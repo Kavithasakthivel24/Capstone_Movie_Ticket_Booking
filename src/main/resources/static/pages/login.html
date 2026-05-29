@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CineBook</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/index.html">
+                <i class="bi bi-camera-reels-fill text-danger me-2"></i>CineBook
+            </a>
+        </div>
+    </nav>
+
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-card">
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-circle text-danger fs-1"></i>
+                    <h3 class="text-white mt-2 mb-1">Welcome Back</h3>
+                    <p class="text-muted mb-0">Sign in to your CineBook account</p>
+                </div>
+
+                <div id="errorAlert" class="alert alert-danger d-none"></div>
+
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <input type="email" class="form-control" id="email" placeholder="admin@gmail.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label" for="password">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100 py-2" id="loginBtn">
+                        <span id="loginSpinner" class="spinner-border spinner-border-sm d-none me-2"></span>
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </button>
+                </form>
+
+                <hr class="border-secondary my-4">
+
+                <div class="text-center">
+                    <p class="text-light">Don't have an account?
+                        <a href="/pages/register.html" class="text-danger fw-semibold">Register now</a>
+                    </p>
+                </div>
+
+                <div class="rounded p-3 mt-2" style="background:#1e1e1e; border:1px solid #2e2e2e;">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-info-circle text-danger me-2"></i>
+                        <strong class="text-danger small">Demo Credentials</strong>
+                    </div>
+                    <div class="row g-2 small">
+                        <div class="col-6">
+                            <div class="p-2 rounded" style="background:#141414; border:1px solid #333;">
+                                <div class="text-warning fw-semibold mb-1"><i class="bi bi-shield-fill me-1"></i>Admin</div>
+                                <div class="text-light">admin@gmail.com</div>
+                                <div class="text-light">Admin@123</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded" style="background:#141414; border:1px solid #333;">
+                                <div class="text-info fw-semibold mb-1"><i class="bi bi-person-fill me-1"></i>User</div>
+                                <div class="text-light">alice@gmail.com</div>
+                                <div class="text-light">User@123</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="toast" class="toast">
+            <div class="toast-header bg-danger text-white"><strong class="me-auto">CineBook</strong><button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button></div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        if (isLoggedIn()) window.location.href = '/index.html';
+
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const pwd = document.getElementById('password');
+            const icon = document.querySelector('#togglePassword i');
+            pwd.type = pwd.type === 'password' ? 'text' : 'password';
+            icon.className = pwd.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const spinner = document.getElementById('loginSpinner');
+            const errorAlert = document.getElementById('errorAlert');
+
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+            errorAlert.classList.add('d-none');
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify({ name: data.name, email: data.email, role: data.role, id: data.userId }));
+                    showToast('Login successful!', 'success');
+                    setTimeout(() => {
+                        window.location.href = data.role === 'ROLE_ADMIN' ? '/pages/admin-dashboard.html' : '/pages/dashboard.html';
+                    }, 800);
+                } else {
+                    errorAlert.textContent = data.message || 'Invalid credentials';
+                    errorAlert.classList.remove('d-none');
+                }
+            } catch (err) {
+                errorAlert.textContent = 'Connection error. Please try again.';
+                errorAlert.classList.remove('d-none');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        });
+    </script>
+</body>
+</html>

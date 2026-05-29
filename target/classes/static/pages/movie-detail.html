@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>Movie Details - CineBook</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body style="background:#0a0a0a;">
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow"
+         style="background:#000; border-bottom:2px solid #dc3545;">
+
+        <div class="container">
+
+            <a class="navbar-brand fw-bold" href="/index.html">
+                <i class="bi bi-camera-reels-fill text-danger me-2"></i>
+                CineBook
+            </a>
+
+            <div class="d-flex align-items-center gap-2" id="authButtons">
+
+                <a href="/pages/login.html"
+                   class="btn btn-outline-light btn-sm">
+                    Login
+                </a>
+
+                <a href="/pages/register.html"
+                   class="btn btn-danger btn-sm">
+                    Register
+                </a>
+
+            </div>
+
+            <div class="d-flex align-items-center gap-2 d-none"
+                 id="userMenu">
+
+                <span class="text-light" id="userName"></span>
+
+                <a href="/pages/dashboard.html"
+                   class="btn btn-outline-light btn-sm">
+                    Dashboard
+                </a>
+
+                <button class="btn btn-outline-danger btn-sm"
+                        onclick="logout()">
+                    Logout
+                </button>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <!-- MOVIE DETAILS -->
+
+    <div id="movieDetailContainer"
+         style="padding-top:70px; min-height:60vh;">
+
+        <div class="text-center py-5">
+
+            <div class="spinner-border text-danger"
+                 style="width:3rem; height:3rem;">
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SHOWS SECTION -->
+
+    <section class="py-5"
+             id="showsSection"
+             style="background:#0f0f0f; display:none;">
+
+        <div class="container">
+
+            <h3 class="text-white fw-bold mb-4">
+
+                <i class="bi bi-calendar3 text-danger me-2"></i>
+
+                Available Shows
+
+            </h3>
+
+            <div class="mb-4">
+
+                <label class="form-label text-light">
+                    Select Date
+                </label>
+
+                <input type="date"
+                       class="form-control"
+                       id="showDate"
+                       style="max-width:220px; background:#181818; color:white; border:1px solid #333;">
+
+            </div>
+
+            <div id="showsContainer">
+
+                <div class="text-center py-5">
+
+                    <i class="bi bi-calendar-event text-muted fs-1 d-block mb-3"></i>
+
+                    <p class="text-muted">
+                        Loading shows...
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- TOAST -->
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+
+        <div id="toast" class="toast">
+
+            <div class="toast-header bg-danger text-white">
+
+                <strong class="me-auto">
+                    CineBook
+                </strong>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="toast">
+                </button>
+
+            </div>
+
+            <div class="toast-body" id="toastMessage"></div>
+
+        </div>
+
+    </div>
+
+    <!-- SCRIPTS -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/js/auth.js"></script>
+
+    <script>
+
+        const params = new URLSearchParams(window.location.search);
+
+        const movieId = params.get('id');
+
+        if (!movieId) {
+
+            window.location.href = '/pages/movies.html';
+
+        }
+
+        // LOAD MOVIE DETAILS
+
+        async function loadMovieDetail() {
+
+            try {
+
+                const res = await fetch(`/api/movies/${movieId}`);
+
+                const movie = await res.json();
+
+                const container =
+                    document.getElementById('movieDetailContainer');
+
+                container.innerHTML = `
+
+                    <div style="background:linear-gradient(to bottom,#1a0a0a,#0a0a0a); padding:50px 0;">
+
+                        <div class="container">
+
+                            <div class="row g-5 align-items-start">
+
+                                <div class="col-md-3">
+
+                                    <img
+                                        src="${movie.posterUrl || 'https://via.placeholder.com/300x450'}"
+                                        class="img-fluid rounded shadow"
+                                        alt="${movie.title}"
+                                        style="border:2px solid #2e2e2e;"
+                                    >
+
+                                </div>
+
+                                <div class="col-md-9">
+
+                                    <h1 class="text-white fw-bold mb-3">
+                                        ${movie.title}
+                                    </h1>
+
+                                    <div class="d-flex gap-3 flex-wrap mb-4">
+
+                                        ${movie.genre
+                                            ? `<span class="badge bg-secondary fs-6 px-3">${movie.genre}</span>`
+                                            : ''
+                                        }
+
+                                        ${movie.language
+                                            ? `<span class="badge bg-secondary fs-6 px-3">${movie.language}</span>`
+                                            : ''
+                                        }
+
+                                        ${movie.duration
+                                            ? `<span class="text-light">
+                                                <i class="bi bi-clock me-1"></i>
+                                                ${movie.duration} min
+                                               </span>`
+                                            : ''
+                                        }
+
+                                    </div>
+
+                                    <p class="text-light fs-6 mb-4"
+                                       style="line-height:1.7;">
+
+                                        ${movie.description || 'No description available.'}
+
+                                    </p>
+
+                                    <button
+                                        class="btn btn-danger btn-lg px-5 fw-semibold"
+                                        onclick="showBookingSection()">
+
+                                        <i class="bi bi-ticket-fill me-2"></i>
+
+                                        Book Tickets
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+                document.title = `${movie.title} - CineBook`;
+
+                document.getElementById('showsSection')
+                    .style.display = 'block';
+
+                initializeDate();
+
+            } catch (err) {
+
+                console.error(err);
+
+                document.getElementById('movieDetailContainer')
+                    .innerHTML = `
+
+                        <div class="container py-5 text-center text-danger">
+
+                            <i class="bi bi-exclamation-triangle fs-1 d-block mb-3"></i>
+
+                            Failed to load movie details
+
+                        </div>
+
+                    `;
+            }
+        }
+
+        // SHOW BOOKING SECTION
+
+        function showBookingSection() {
+
+            const section =
+                document.getElementById('showsSection');
+
+            section.style.display = 'block';
+
+            section.scrollIntoView({
+                behavior: 'smooth'
+            });
+
+        }
+
+        // AUTO LOAD FIRST AVAILABLE DATE
+
+        async function initializeDate() {
+
+            try {
+
+                const res = await fetch(
+                    `/api/shows/movie/${movieId}`
+                );
+
+                const allShows = await res.json();
+
+                console.log(allShows);
+
+                if (allShows.length > 0) {
+
+                    // SORT DATES
+
+                    allShows.sort((a, b) =>
+                        new Date(a.showDate) - new Date(b.showDate)
+                    );
+
+                    // FIRST AVAILABLE DATE
+
+                    const firstDate =
+                        allShows[0].showDate;
+
+                    document.getElementById('showDate')
+                        .value = firstDate;
+
+                    loadShows(firstDate);
+
+                }
+
+            } catch (err) {
+
+                console.error(err);
+
+            }
+        }
+
+        // LOAD SHOWS
+
+        async function loadShows(date) {
+
+            const container =
+                document.getElementById('showsContainer');
+
+            container.innerHTML = `
+
+                <div class="text-center py-4">
+
+                    <div class="spinner-border text-danger"></div>
+
+                </div>
+
+            `;
+
+            try {
+
+                const res = await fetch(
+                    `/api/shows/movie/${movieId}`
+                );
+
+                const allShows = await res.json();
+
+                console.log("ALL SHOWS:", allShows);
+
+                // FILTER BY DATE
+
+                const shows = allShows.filter(show =>
+                    show.showDate === date
+                );
+
+                console.log("FILTERED:", shows);
+
+                if (shows.length === 0) {
+
+                    container.innerHTML = `
+
+                        <div class="text-center py-5">
+
+                            <i class="bi bi-calendar-x text-muted fs-1 d-block mb-3"></i>
+
+                            <p class="text-muted">
+                                No shows available for this date
+                            </p>
+
+                        </div>
+
+                    `;
+
+                    return;
+                }
+
+                container.innerHTML = shows.map(show => `
+
+                    <div class="rounded mb-3 p-3"
+                         style="
+                            background:#181818;
+                            border:1px solid #2e2e2e;
+                         ">
+
+                        <div class="row align-items-center">
+
+                            <div class="col-md-4">
+
+                                <h5 class="text-white fw-bold mb-1">
+
+                                    ${show.theaterName}
+
+                                </h5>
+
+                                <small class="text-muted">
+
+                                    <i class="bi bi-geo-alt me-1"></i>
+
+                                    ${show.theaterCity}
+
+                                </small>
+
+                                <br>
+
+                                <small class="text-light">
+
+                                    ${show.screenName}
+
+                                </small>
+
+                            </div>
+
+                            <div class="col-md-3">
+
+                                <div class="text-white fs-5 fw-bold">
+
+                                    ${show.startTime}
+
+                                </div>
+
+                                <small class="text-muted">
+
+                                    Ends ${show.endTime}
+
+                                </small>
+
+                            </div>
+
+                            <div class="col-md-2">
+
+                                <div class="text-success fw-semibold">
+
+                                    ${show.availableSeats} Seats
+
+                                </div>
+
+                                <small class="text-muted">
+
+                                    Available
+
+                                </small>
+
+                            </div>
+
+                            <div class="col-md-2">
+
+                                <div class="text-white fw-bold">
+
+                                    ₹${show.ticketPrice}
+
+                                </div>
+
+                                <small class="text-muted">
+
+                                    Per Seat
+
+                                </small>
+
+                            </div>
+
+                            <div class="col-md-1 text-end">
+
+                                <button
+                                    class="btn btn-danger btn-sm"
+
+                                    onclick="bookShow(${show.id})"
+
+                                    ${show.availableSeats === 0
+                                        ? 'disabled'
+                                        : ''
+                                    }>
+
+                                    ${show.availableSeats === 0
+                                        ? 'Sold'
+                                        : 'Book'
+                                    }
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `).join('');
+
+            } catch (err) {
+
+                console.error(err);
+
+                container.innerHTML = `
+
+                    <div class="text-danger">
+
+                        Failed to load shows
+
+                    </div>
+
+                `;
+            }
+        }
+
+        // BOOK SHOW
+
+        function bookShow(showId) {
+
+            if (!isLoggedIn()) {
+
+                window.location.href =
+                    '/pages/login.html';
+
+                return;
+            }
+
+            window.location.href =
+                `/pages/booking.html?showId=${showId}`;
+        }
+
+        // DATE CHANGE
+
+        document.getElementById('showDate')
+            .addEventListener('change', (e) => {
+
+                loadShows(e.target.value);
+
+            });
+
+        // INITIAL LOAD
+
+        loadMovieDetail();
+
+    </script>
+
+</body>
+</html>

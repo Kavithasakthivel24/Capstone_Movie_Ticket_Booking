@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies - CineBook</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/index.html"><i class="bi bi-camera-reels-fill text-danger me-2"></i>CineBook</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/pages/movies.html">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pages/theaters.html">Theaters</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-2" id="authButtons">
+                    <a href="/pages/login.html" class="btn btn-outline-light btn-sm">Login</a>
+                    <a href="/pages/register.html" class="btn btn-danger btn-sm">Register</a>
+                </div>
+                <div class="d-flex align-items-center gap-2 d-none" id="userMenu">
+                    <span class="text-light" id="userName"></span>
+                    <a href="/pages/dashboard.html" class="btn btn-outline-light btn-sm">Dashboard</a>
+                    <button class="btn btn-outline-danger btn-sm" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h1 class="text-white fw-bold mb-3"><i class="bi bi-film text-danger me-2"></i>Movies</h1>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by title...">
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="genreFilter">
+                        <option value="">All Genres</option>
+                        <option>Action</option><option>Drama</option><option>Comedy</option>
+                        <option>Sci-Fi</option><option>Fantasy</option><option>Horror</option>
+                        <option>Thriller</option><option>Romance</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="languageFilter">
+                        <option value="">All Languages</option>
+                        <option>English</option><option>Hindi</option><option>Telugu</option>
+                        <option>Tamil</option><option>Kannada</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="NOW_SHOWING">Now Showing</option>
+                        <option value="COMING_SOON">Coming Soon</option>
+                        <option value="TRENDING">Trending</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-danger w-100" onclick="filterMovies()">
+                        <i class="bi bi-search me-1"></i>Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="py-5" style="background:#0a0a0a;">
+        <div class="container">
+            <div class="row g-4" id="moviesContainer">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-danger" style="width:3rem;height:3rem;"></div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center mt-5" id="paginationContainer"></div>
+        </div>
+    </section>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="toast" class="toast">
+            <div class="toast-header bg-danger text-white"><strong class="me-auto">CineBook</strong><button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button></div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        let currentPage = 0;
+        const pageSize = 12;
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('search')) {
+            document.getElementById('searchInput').value = params.get('search');
+        }
+
+        async function loadMovies(page = 0) {
+            const container = document.getElementById('moviesContainer');
+            container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-danger" style="width:3rem;height:3rem;"></div></div>';
+
+            const title    = document.getElementById('searchInput').value;
+            const genre    = document.getElementById('genreFilter').value;
+            const language = document.getElementById('languageFilter').value;
+            const status   = document.getElementById('statusFilter').value;
+
+            let url = `/api/movies?page=${page}&size=${pageSize}&sortBy=id`;
+            if (title)    url += `&title=${encodeURIComponent(title)}`;
+            if (genre)    url += `&genre=${encodeURIComponent(genre)}`;
+            if (language) url += `&language=${encodeURIComponent(language)}`;
+            if (status)   url += `&status=${status}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const movies = data.content || [];
+
+                container.innerHTML = movies.length
+                    ? movies.map(createMovieCard).join('')
+                    : `<div class="col-12 text-center py-5">
+                            <i class="bi bi-film text-muted fs-1 d-block mb-3"></i>
+                            <p class="text-muted">No movies found matching your search</p>
+                       </div>`;
+
+                renderPagination(data.totalPages, page);
+            } catch (err) {
+                container.innerHTML = '<div class="col-12 text-center text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load movies</div>';
+            }
+        }
+
+        function filterMovies() { loadMovies(0); }
+
+        function renderPagination(totalPages, currentPage) {
+            const container = document.getElementById('paginationContainer');
+            if (totalPages <= 1) { container.innerHTML = ''; return; }
+            let html = '<nav><ul class="pagination gap-1">';
+            for (let i = 0; i < totalPages; i++) {
+                html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <button class="page-link" onclick="loadMovies(${i})">${i + 1}</button>
+                </li>`;
+            }
+            html += '</ul></nav>';
+            container.innerHTML = html;
+        }
+
+        loadMovies(0);
+    </script>
+</body>
+</html>

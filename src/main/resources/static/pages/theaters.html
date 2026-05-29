@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theaters - CineBook</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/index.html"><i class="bi bi-camera-reels-fill text-danger me-2"></i>CineBook</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pages/movies.html">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/pages/theaters.html">Theaters</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-2" id="authButtons">
+                    <a href="/pages/login.html" class="btn btn-outline-light btn-sm">Login</a>
+                    <a href="/pages/register.html" class="btn btn-danger btn-sm">Register</a>
+                </div>
+                <div class="d-flex align-items-center gap-2 d-none" id="userMenu">
+                    <span class="text-light" id="userName"></span>
+                    <a href="/pages/dashboard.html" class="btn btn-outline-light btn-sm">Dashboard</a>
+                    <button class="btn btn-outline-danger btn-sm" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h1 class="text-white fw-bold mb-3"><i class="bi bi-building text-danger me-2"></i>Theaters</h1>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="cityFilter" placeholder="Filter by city...">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-danger w-100" onclick="filterTheaters()">
+                        <i class="bi bi-search me-1"></i>Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="py-5" style="background:#0a0a0a;">
+        <div class="container">
+            <div class="row g-4" id="theatersContainer">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-danger" style="width:3rem;height:3rem;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="toast" class="toast">
+            <div class="toast-header bg-danger text-white"><strong class="me-auto">CineBook</strong><button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button></div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        async function loadTheaters(city = '') {
+            const container = document.getElementById('theatersContainer');
+            container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-danger"></div></div>';
+
+            try {
+                const url = city ? `/api/theaters?city=${encodeURIComponent(city)}` : '/api/theaters';
+                const res = await fetch(url);
+                const theaters = await res.json();
+
+                if (!theaters.length) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <i class="bi bi-building text-muted fs-1 d-block mb-3"></i>
+                            <p class="text-muted">No theaters found</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = theaters.map(t => `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="movie-card h-100 p-4" style="cursor:default;">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width:48px;height:48px;background:#2a0a0a;border:1px solid #dc3545;">
+                                    <i class="bi bi-building text-danger fs-5"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-white fw-bold mb-1">${t.theaterName}</h5>
+                                    <span class="text-danger fw-semibold small">
+                                        <i class="bi bi-geo-alt-fill me-1"></i>${t.city}
+                                    </span>
+                                </div>
+                            </div>
+                            ${t.address ? `
+                            <p class="text-light small mb-3">
+                                <i class="bi bi-map-fill text-muted me-2"></i>${t.address}
+                            </p>` : ''}
+                            <div class="d-flex gap-3 mb-3">
+                                ${t.totalScreens ? `
+                                <span class="text-light small">
+                                    <i class="bi bi-display text-muted me-1"></i>${t.totalScreens} Screen${t.totalScreens > 1 ? 's' : ''}
+                                </span>` : ''}
+                            </div>
+                            ${t.facilities ? `
+                            <div class="d-flex flex-wrap gap-1 mt-2">
+                                ${t.facilities.split(',').map(f => `
+                                    <span class="badge px-2 py-1" style="background:#2a2a2a;color:#d0d5dd;border:1px solid #3a3a3a;">${f.trim()}</span>
+                                `).join('')}
+                            </div>` : ''}
+                        </div>
+                    </div>`).join('');
+            } catch (err) {
+                container.innerHTML = '<div class="col-12 text-center text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load theaters</div>';
+            }
+        }
+
+        function filterTheaters() {
+            loadTheaters(document.getElementById('cityFilter').value.trim());
+        }
+
+        loadTheaters();
+    </script>
+</body>
+</html>

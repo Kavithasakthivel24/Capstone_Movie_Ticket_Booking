@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - CineBook</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/index.html"><i class="bi bi-camera-reels-fill text-danger me-2"></i>CineBook</a>
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-person-circle text-light me-1"></i>
+                <span class="text-light fw-500" id="userName"></span>
+                <a href="/pages/movies.html" class="btn btn-outline-light btn-sm">Browse Movies</a>
+                <button class="btn btn-outline-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div style="padding-top: 80px; background-color: #0a0a0a; min-height: 100vh;">
+        <div class="container py-5">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="text-white fw-bold"><i class="bi bi-speedometer2 text-danger me-2"></i>My Dashboard</h2>
+                    <p class="text-muted mb-0" id="userEmail"></p>
+                </div>
+            </div>
+
+            <!-- Profile Card -->
+            <div class="row g-4 mb-5" id="profileSection"></div>
+
+            <!-- Booking History -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h4 class="text-white mb-0"><i class="bi bi-ticket-fill text-danger me-2"></i>My Bookings</h4>
+                <a href="/pages/movies.html" class="btn btn-danger btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i>Book Tickets
+                </a>
+            </div>
+            <div id="bookingsContainer">
+                <div class="text-center py-5"><div class="spinner-border text-danger"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="toast" class="toast">
+            <div class="toast-header bg-danger text-white"><strong class="me-auto">CineBook</strong><button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button></div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        if (!isLoggedIn()) window.location.href = '/pages/login.html';
+        if (isAdmin()) window.location.href = '/pages/admin-dashboard.html';
+
+        const user = getUser();
+        if (user) {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userEmail').textContent = user.email;
+        }
+
+        async function loadProfile() {
+            try {
+                const res = await apiRequest('/users/me');
+                const profile = await res.json();
+                document.getElementById('profileSection').innerHTML = `
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <i class="bi bi-person-circle text-danger fs-1 mb-3 d-block"></i>
+                            <h5 class="text-white fw-bold">${profile.name}</h5>
+                            <p class="text-light mb-1"><i class="bi bi-envelope me-1 text-muted"></i>${profile.email}</p>
+                            <p class="text-light mb-2"><i class="bi bi-telephone me-1 text-muted"></i>${profile.phone || 'No phone set'}</p>
+                            <span class="badge bg-danger px-3 py-1">${profile.role === 'ROLE_USER' ? 'Member' : 'Admin'}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <i class="bi bi-ticket-fill text-danger fs-1 mb-3 d-block"></i>
+                            <div class="stat-number" id="totalBookingsCount">—</div>
+                            <div class="stat-label">Total Bookings</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <i class="bi bi-check-circle-fill text-success fs-1 mb-3 d-block"></i>
+                            <div class="stat-number text-success" id="confirmedCount">—</div>
+                            <div class="stat-label">Confirmed Bookings</div>
+                        </div>
+                    </div>`;
+            } catch (err) {}
+        }
+
+        async function loadBookings() {
+            try {
+                const res = await apiRequest('/bookings/my-bookings');
+                const bookings = await res.json();
+                const container = document.getElementById('bookingsContainer');
+
+                if (document.getElementById('totalBookingsCount')) {
+                    document.getElementById('totalBookingsCount').textContent = bookings.length || 0;
+                    const confirmed = (bookings || []).filter(b => b.status === 'CONFIRMED').length;
+                    document.getElementById('confirmedCount').textContent = confirmed;
+                }
+
+                if (!bookings || bookings.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-5" style="background:#181818;border-radius:12px;border:1px solid #2e2e2e;">
+                            <i class="bi bi-ticket text-danger fs-1 mb-3 d-block"></i>
+                            <h5 class="text-light">No bookings yet</h5>
+                            <p class="text-muted">Book your first movie ticket today!</p>
+                            <a href="/pages/movies.html" class="btn btn-danger mt-2">Browse Movies</a>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = bookings.map(b => `
+                    <div class="card mb-3" style="background:#181818;border:1px solid #2e2e2e;border-radius:10px;transition:border-color 0.2s;"
+                         onmouseover="this.style.borderColor='#dc3545'" onmouseout="this.style.borderColor='#2e2e2e'">
+                        <div class="card-body py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-5">
+                                    <h6 class="text-white fw-bold mb-1">
+                                        <i class="bi bi-film text-danger me-2"></i>${b.movieTitle}
+                                    </h6>
+                                    <div class="text-light small">
+                                        <i class="bi bi-building me-1 text-muted"></i>${b.theaterName}, ${b.theaterCity}
+                                    </div>
+                                    <div class="text-light small">
+                                        <i class="bi bi-calendar me-1 text-muted"></i>${b.showDate}
+                                        &nbsp;<i class="bi bi-clock me-1 text-muted"></i>${b.startTime}
+                                    </div>
+                                    <div class="text-light small">
+                                        <i class="bi bi-ticket me-1 text-muted"></i>Seats: <span class="text-warning">${(b.seatNumbers || []).join(', ')}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="small text-muted mb-1">Booking ID</div>
+                                    <code class="text-danger fw-bold">${b.bookingId}</code>
+                                    ${b.payment ? `<br><small class="text-muted">TXN: <span class="text-light">${b.payment.transactionId}</span></small>` : ''}
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <div class="text-white fw-bold fs-5">₹${b.totalAmount}</div>
+                                    <span class="badge ${b.status === 'CONFIRMED' ? 'bg-success' : b.status === 'CANCELLED' ? 'bg-danger' : 'bg-warning text-dark'} mt-1">${b.status}</span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    ${b.status === 'CONFIRMED' ? `
+                                        <button class="btn btn-outline-danger btn-sm" onclick="cancelBooking(${b.id})">
+                                            <i class="bi bi-x-circle me-1"></i>Cancel
+                                        </button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`).join('');
+            } catch (err) {
+                document.getElementById('bookingsContainer').innerHTML = '<p class="text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load bookings</p>';
+            }
+        }
+
+        async function cancelBooking(id) {
+            if (!confirm('Are you sure you want to cancel this booking? A refund will be processed in 5–7 days.')) return;
+            showSpinner();
+            try {
+                const res = await apiRequest(`/bookings/${id}`, { method: 'DELETE' });
+                hideSpinner();
+                if (res.ok) {
+                    showToast('Booking cancelled. Refund will be processed in 5–7 days.', 'success');
+                    setTimeout(loadBookings, 1000);
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Failed to cancel booking', 'error');
+                }
+            } catch (err) {
+                hideSpinner();
+                showToast('Error cancelling booking', 'error');
+            }
+        }
+
+        loadProfile();
+        loadBookings();
+    </script>
+</body>
+</html>

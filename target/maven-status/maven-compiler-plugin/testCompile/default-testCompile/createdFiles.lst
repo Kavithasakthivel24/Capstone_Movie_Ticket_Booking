@@ -1,0 +1,6 @@
+com\movieticket\booking\service\MovieServiceTest.class
+com\movieticket\booking\service\AuthServiceTest.class
+com\movieticket\booking\security\JwtUtilTest.class
+com\movieticket\booking\controller\MovieControllerTest.class
+com\movieticket\booking\service\BookingServiceTest.class
+com\movieticket\booking\controller\AuthControllerTest.class

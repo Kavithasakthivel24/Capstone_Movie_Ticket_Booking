@@ -1,0 +1,657 @@
+/* ================================================================
+   CineBook - Dark Cinema Theme
+   ================================================================ */
+
+/* Global Reset */
+* { box-sizing: border-box; }
+
+/* Override Bootstrap's muted/secondary text for dark theme */
+:root {
+    --bs-secondary-color: #b0b8c4;
+    --bs-body-color: #e0e0e0;
+    --bs-body-bg: #0a0a0a;
+    --cinema-red: #dc3545;
+    --cinema-gold: #f59e0b;
+    --cinema-dark: #111111;
+    --cinema-card: #181818;
+    --cinema-border: #2e2e2e;
+    --cinema-surface: #1e1e1e;
+    --text-dim: #a0a8b4;
+}
+
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Globally lighten Bootstrap's text-muted on dark backgrounds */
+.text-muted {
+    color: #9aa3ad !important;
+}
+
+/* ================================================================
+   Navbar
+   ================================================================ */
+.navbar {
+    border-bottom: 2px solid var(--cinema-red);
+    background-color: #0e0e0e !important;
+}
+
+.navbar-brand {
+    color: #fff !important;
+    letter-spacing: 0.5px;
+}
+
+.nav-link {
+    color: #ccd0d5 !important;
+    transition: color 0.2s ease;
+    font-weight: 500;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #fff !important;
+}
+
+.nav-link.active {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* ================================================================
+   Hero Section
+   ================================================================ */
+.hero-section {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 40%, #2d0a0a 100%);
+    position: relative;
+    overflow: hidden;
+    padding-top: 80px;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1920') center/cover;
+    opacity: 0.15;
+}
+
+.hero-section > * { position: relative; z-index: 1; }
+
+/* ================================================================
+   Movie Card
+   ================================================================ */
+.movie-card {
+    background: var(--cinema-card);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    border: 1px solid var(--cinema-border);
+    height: 100%;
+}
+
+.movie-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(220, 53, 69, 0.3);
+    border-color: var(--cinema-red);
+}
+
+.movie-card img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+}
+
+.movie-card-body {
+    padding: 0.85rem;
+}
+
+.movie-card-title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.movie-card-info {
+    color: #b0b8c4;
+    font-size: 0.82rem;
+}
+
+/* ================================================================
+   Rating Badge
+   ================================================================ */
+.rating-badge {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+/* ================================================================
+   Status Badges
+   ================================================================ */
+.badge-now-showing { background-color: #198754 !important; }
+.badge-coming-soon { background-color: #0d6efd !important; }
+.badge-trending    { background-color: #dc3545 !important; }
+
+/* ================================================================
+   Feature Cards
+   ================================================================ */
+.feature-card {
+    background: var(--cinema-surface);
+    border: 1px solid var(--cinema-border);
+    transition: border-color 0.3s, transform 0.2s;
+}
+
+.feature-card:hover {
+    border-color: var(--cinema-red);
+    transform: translateY(-4px);
+}
+
+.feature-card p {
+    color: #b0b8c4 !important;
+}
+
+/* ================================================================
+   Seat Grid
+   ================================================================ */
+.seat-grid {
+    display: grid;
+    gap: 6px;
+}
+
+.seat {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px 6px 0 0;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #000;
+}
+
+.seat:hover:not(:disabled) { transform: scale(1.15); }
+
+.seat.silver   { background-color: #9ca3af; color: #111; }
+.seat.gold     { background-color: #f59e0b; color: #111; }
+.seat.platinum { background-color: #a855f7; color: #fff; }
+.seat.selected { background-color: #22c55e !important; color: #fff; }
+.seat.booked   { background-color: #374151 !important; cursor: not-allowed; color: #6b7280; }
+.seat.locked   { background-color: #ef4444 !important; cursor: not-allowed; color: #fff; }
+
+/* Seat legend labels */
+.seat-legend-label {
+    color: #d0d5dd;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* ================================================================
+   Screen
+   ================================================================ */
+.screen {
+    background: linear-gradient(180deg, #dc3545 0%, transparent 100%);
+    height: 10px;
+    border-radius: 50% 50% 0 0;
+    margin: 0 auto 30px auto;
+    width: 80%;
+    opacity: 0.8;
+}
+
+.screen-label {
+    color: #a0a8b4;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    font-weight: 600;
+}
+
+/* ================================================================
+   Booking Summary
+   ================================================================ */
+.booking-summary {
+    background: var(--cinema-surface);
+    border: 1px solid var(--cinema-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.booking-summary .summary-label {
+    color: #b0b8c4;
+    font-size: 0.9rem;
+}
+
+/* ================================================================
+   Dashboard Stat Cards
+   ================================================================ */
+.stat-card {
+    background: var(--cinema-surface);
+    border: 1px solid var(--cinema-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: border-color 0.3s, transform 0.2s;
+}
+
+.stat-card:hover {
+    border-color: var(--cinema-red);
+    transform: translateY(-3px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #dc3545;
+}
+
+.stat-card .stat-label {
+    color: #b0b8c4;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+/* Override text-muted inside stat cards to be lighter */
+.stat-card .text-muted {
+    color: #b0b8c4 !important;
+}
+
+/* ================================================================
+   Forms
+   ================================================================ */
+.form-control,
+.form-select {
+    background-color: #1c1c1c;
+    border: 1px solid #3a3a3a;
+    color: #e8eaed;
+    border-radius: 8px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #1c1c1c;
+    border-color: #dc3545;
+    color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-control:hover,
+.form-select:hover {
+    border-color: #555;
+}
+
+.form-control::placeholder {
+    color: #6b7280;
+}
+
+.form-label {
+    color: #d0d5dd;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+
+/* Input group icons */
+.input-group-text {
+    background-color: #1c1c1c;
+    border: 1px solid #3a3a3a;
+    color: #b0b8c4;
+}
+
+/* Form check labels */
+.form-check-label {
+    color: #d0d5dd;
+}
+
+/* Validation feedback */
+.invalid-feedback {
+    color: #f87171;
+    font-size: 0.82rem;
+}
+
+.valid-feedback {
+    color: #4ade80;
+    font-size: 0.82rem;
+}
+
+/* ================================================================
+   Auth Pages
+   ================================================================ */
+.auth-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #0a0a0a, #1a0a0a);
+    padding-top: 80px;
+}
+
+.auth-card {
+    background: #181818;
+    border: 1px solid #2e2e2e;
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.auth-card .text-muted {
+    color: #9aa3ad !important;
+}
+
+/* ================================================================
+   Tables
+   ================================================================ */
+.table-dark {
+    --bs-table-bg: #181818;
+    --bs-table-striped-bg: #1e1e1e;
+    --bs-table-hover-bg: #252525;
+    --bs-table-border-color: #2e2e2e;
+    --bs-table-color: #e0e0e0;
+}
+
+.table-dark th {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #3a3a3a !important;
+    background-color: #141414;
+    padding: 1rem 0.75rem;
+}
+
+.table-dark td {
+    color: #d0d5dd;
+    vertical-align: middle;
+    border-color: #2a2a2a;
+    padding: 0.85rem 0.75rem;
+}
+
+.table-dark tbody tr:hover {
+    background-color: #252525 !important;
+    color: #fff;
+}
+
+.table-dark .text-white {
+    color: #fff !important;
+    font-weight: 500;
+}
+
+/* ================================================================
+   Nav Tabs (Admin Dashboard)
+   ================================================================ */
+.nav-tabs {
+    border-bottom: 2px solid #2e2e2e;
+    gap: 0.25rem;
+}
+
+.nav-tabs .nav-link {
+    color: #9aa3ad !important;
+    border: 1px solid transparent;
+    border-radius: 8px 8px 0 0;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #e0e0e0 !important;
+    background-color: #1e1e1e;
+    border-color: #3a3a3a #3a3a3a transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: #fff !important;
+    background-color: #1e1e1e;
+    border-color: var(--cinema-red) var(--cinema-red) #181818;
+    font-weight: 600;
+}
+
+/* ================================================================
+   Pagination
+   ================================================================ */
+.page-link {
+    background-color: #181818 !important;
+    border-color: #3a3a3a !important;
+    color: #d0d5dd !important;
+    transition: all 0.2s;
+}
+
+.page-link:hover {
+    background-color: #252525 !important;
+    border-color: var(--cinema-red) !important;
+    color: #fff !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--cinema-red) !important;
+    border-color: var(--cinema-red) !important;
+    color: #fff !important;
+}
+
+/* ================================================================
+   Cards (Bootstrap dark cards)
+   ================================================================ */
+.card.bg-dark {
+    background-color: #181818 !important;
+}
+
+.card.bg-dark .card-body .text-muted {
+    color: #9aa3ad !important;
+}
+
+/* ================================================================
+   Modals
+   ================================================================ */
+.modal-content.bg-dark {
+    background-color: #181818 !important;
+    border: 1px solid #3a3a3a;
+}
+
+.modal-header {
+    border-bottom-color: #3a3a3a;
+}
+
+.modal-footer {
+    border-top-color: #3a3a3a;
+}
+
+.modal-title {
+    color: #fff;
+}
+
+.modal-content .form-label {
+    color: #d0d5dd;
+}
+
+/* ================================================================
+   Alerts
+   ================================================================ */
+.alert-dark {
+    background-color: #1e1e1e;
+    border-color: #3a3a3a;
+    color: #d0d5dd;
+}
+
+/* ================================================================
+   Buttons
+   ================================================================ */
+.btn-outline-secondary {
+    color: #b0b8c4;
+    border-color: #4a4a4a;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #2e2e2e;
+    color: #fff;
+    border-color: #6a6a6a;
+}
+
+.btn-danger {
+    background-color: var(--cinema-red);
+    border-color: var(--cinema-red);
+    font-weight: 500;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.35);
+}
+
+.btn-outline-danger {
+    color: #f07080;
+    border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--cinema-red);
+    color: #fff;
+}
+
+.btn-outline-light {
+    color: #e0e6ed;
+    border-color: #7a8490;
+}
+
+.btn-outline-light:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: #b0b8c4;
+}
+
+/* ================================================================
+   Toasts
+   ================================================================ */
+.toast {
+    min-width: 300px;
+    background-color: #1e1e1e;
+    border: 1px solid #3a3a3a;
+}
+
+.toast-body {
+    background-color: #1e1e1e;
+    color: #e0e6ed;
+    font-size: 0.9rem;
+}
+
+/* ================================================================
+   Loading Spinner Overlay
+   ================================================================ */
+.spinner-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* ================================================================
+   Custom Scrollbar
+   ================================================================ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #dc3545; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #c82333; }
+
+/* ================================================================
+   Page Header
+   ================================================================ */
+.page-header {
+    background: linear-gradient(135deg, #130808, #1f0f0f);
+    padding: 80px 0 40px 0;
+    border-bottom: 1px solid #2a0a0a;
+}
+
+.page-header .form-control,
+.page-header .form-select {
+    background-color: #1e1e1e;
+    border-color: #3a3a3a;
+}
+
+/* ================================================================
+   Breadcrumb
+   ================================================================ */
+.breadcrumb-item.active {
+    color: #b0b8c4;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: #6b7280;
+}
+
+/* ================================================================
+   Code elements (booking IDs etc)
+   ================================================================ */
+code.text-danger {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* ================================================================
+   Footer
+   ================================================================ */
+footer {
+    background-color: #080808 !important;
+    border-top: 1px solid #1e1e1e;
+}
+
+footer p {
+    color: #7a8490 !important;
+    margin: 0;
+}
+
+/* ================================================================
+   Border overrides
+   ================================================================ */
+.border-secondary {
+    border-color: #3a3a3a !important;
+}
+
+hr.border-secondary {
+    border-color: #2e2e2e !important;
+    opacity: 1;
+}
+
+/* ================================================================
+   Show listing cards
+   ================================================================ */
+.show-card {
+    background: var(--cinema-surface);
+    border: 1px solid var(--cinema-border);
+    border-radius: 10px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.show-card:hover {
+    border-color: #dc3545;
+    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.15);
+}
+
+/* ================================================================
+   Responsive
+   ================================================================ */
+@media (max-width: 768px) {
+    .movie-card img { height: 240px; }
+    .hero-section h1 { font-size: 2rem; }
+    .stat-number { font-size: 1.8rem; }
+    .auth-card { padding: 1.5rem; }
+    .booking-summary { padding: 1rem; }
+}
